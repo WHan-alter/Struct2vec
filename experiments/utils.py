@@ -18,12 +18,12 @@ from argparse import ArgumentParser
 
 
 def get_args():
-    parser = ArgumentParser(description='Structure to sequence modeling')
+    parser = ArgumentParser(description='Structure to vector embedding')
     parser.add_argument('--hidden', type=int, default=128, help='number of hidden dimensions')
     parser.add_argument('--k_neighbors', type=int, default=30, help='Neighborhood size for k-NN')
-    parser.add_argument('--vocab_size', type=int, default=20, help='Alphabet size')
+    parser.add_argument('--out_dim', type=int, default=16, help='Final embed size')
     parser.add_argument('--features', type=str, default='full', help='Protein graph features')
-    parser.add_argument('--model_type', type=str, default='structure', help='Enrich with alignments')
+    parser.add_argument('--model_type', type=str, default='EmbedStructure', help='Enrich with alignments')
     parser.add_argument('--mpnn', action='store_true', help='Use MPNN updates instead of attention')
 
     parser.add_argument('--restore', type=str, default='', help='Checkpoint file for restoration')
@@ -58,9 +58,9 @@ def setup_device_rng(args):
 
 def setup_model(hyperparams, device):
     # Build the model
-    if hyperparams['model_type'] == 'structure':
-        model = struct2seq.Struct2Seq(
-            num_letters=hyperparams['vocab_size'], 
+    if hyperparams['model_type'] == 'EmbedStructure':
+        model = struct_embed.StructEmbed(
+            out_dim=hyperparams['out_dim'], 
             node_features=hyperparams['hidden'],
             edge_features=hyperparams['hidden'], 
             hidden_dim=hyperparams['hidden'],
@@ -69,17 +69,8 @@ def setup_model(hyperparams, device):
             dropout=hyperparams['dropout'],
             use_mpnn=hyperparams['mpnn']
         ).to(device)
-    elif hyperparams['model_type'] == 'sequence':
-        model = seq_model.SequenceModel(
-            num_letters=hyperparams['vocab_size'],
-            hidden_dim=hyperparams['hidden'],
-            top_k=hyperparams['k_neighbors']
-        ).to(device)
-    elif hyperparams['model_type'] == 'rnn':
-        model = seq_model.LanguageRNN(
-            num_letters=hyperparams['vocab_size'],
-            hidden_dim=hyperparams['hidden']
-        ).to(device)
+    
+
 
     print('Number of parameters: {}'.format(sum([p.numel() for p in model.parameters()])))
     return model

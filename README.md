@@ -1,27 +1,9 @@
-# Graph-Based Protein Design
+## About the code
 
-This repo contains code for [Generative Models for Graph-Based Protein Design](https://papers.nips.cc/paper/9711-generative-models-for-graph-based-protein-design) by John Ingraham, Vikas Garg, Regina Barzilay and Tommi Jaakkola, NeurIPS 2019.
+The code offers a way in strcture embedding. It first translates the pdb into a graph (a.a.-based), then use a GAT for feature grabbing.
 
-Our approach 'designs' protein sequences for target 3D structures via a graph-conditioned, autoregressive language model:
-<p align="center"><img src="data/scheme.png" width="500"></p>
+Example code:
+python struct_embed.py --cuda --file_data ../data/covid_antibody/merged_antibody_set.jsonl --features full --name full
 
-
-## Overview
-* `struct2seq/` contains model code
-* `experiments/` contains scripts for training and evaluating the model
-* `data/` contains scripts for building and processing datasets in the paper
-
-## Requirements
-* Python >= 3.0
-* PyTorch >= 1.0
-* Numpy
-
-## Citation
-```
-@inproceedings{ingraham2019generative,
-author = {Ingraham, John and Garg, Vikas K and Barzilay, Regina and Jaakkola, Tommi},
-title = {Generative Models for Graph-Based Protein Design},
-booktitle = {Advances in Neural Information Processing Systems}
-year = {2019}
-}
-```
+This code is rewritten and originally from the github repository:
+https://github.com/jingraham/neurips19-graph-protein-design 

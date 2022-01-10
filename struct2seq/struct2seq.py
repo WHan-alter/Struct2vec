@@ -83,10 +83,10 @@ class Struct2Seq(nn.Module):
         # Encoder is unmasked self-attention
         mask_attend = gather_nodes(mask.unsqueeze(-1),  E_idx).squeeze(-1)
         mask_attend = mask.unsqueeze(-1) * mask_attend
+        import pdb; pdb.set_trace()
         for layer in self.encoder_layers:
             h_EV = cat_neighbors_nodes(h_V, h_E, E_idx)
             h_V = layer(h_V, h_EV, mask_V=mask, mask_attend=mask_attend)
-
         # Concatenate sequence embeddings for autoregressive decoder
         h_S = self.W_s(S)
         h_ES = cat_neighbors_nodes(h_S, h_E, E_idx)
