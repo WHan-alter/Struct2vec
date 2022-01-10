@@ -97,6 +97,19 @@ class SequenceDataset():
         return self.data[idx]
 
 
+class simple_StructureLoader():
+    def __init__(self, dataset, batch_size=100, shuffle=False):
+        self.dataset = dataset
+        self.size = len(dataset)
+        self.batch_size = batch_size
+    
+    def __len__(self):
+        return 1
+
+    def __iter__(self):
+       batch = [self.dataset[i] for i in range(self.size)] 
+       yield batch
+
 class StructureLoader():
     def __init__(self, dataset, batch_size=100, shuffle=True,
         collate_fn=lambda x:x, drop_last=False):
@@ -126,6 +139,7 @@ class StructureLoader():
 
     def __iter__(self):
         np.random.shuffle(self.clusters)
+        import pdb; pdb.set_trace()
         for b_idx in self.clusters:
             batch = [self.dataset[i] for i in b_idx]
             yield batch

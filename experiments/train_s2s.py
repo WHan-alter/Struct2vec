@@ -22,59 +22,25 @@ dataset = data.StructureDataset(args.file_data, truncate=None, max_length=500)
 
 # Split the dataset
 dataset_indices = {d['name']:i for i,d in enumerate(dataset)}
-with open(args.file_splits) as f:
-    dataset_splits = json.load(f)
-train_set, validation_set, test_set = [
-    Subset(dataset, [
-        dataset_indices[chain_name] for chain_name in dataset_splits[key] 
-        if chain_name in dataset_indices
-    ])
-    for key in ['train', 'validation', 'test']
-]
-loader_train, loader_validation, loader_test = [data.StructureLoader(
-    d, batch_size=args.batch_tokens
-) for d in [train_set, validation_set, test_set]]
-print('Training:{}, Validation:{}, Test:{}'.format(len(train_set),len(validation_set),len(test_set)))
+loader_antibody = data.simple_StructureLoader(dataset, batch_size=args.batch_tokens)
 
-# Build basepath for experiment
-if args.name != '':
-    base_folder = 'log/' + args.name + '/'
-else:
-    base_folder = time.strftime('log/%y%b%d_%I%M%p/', time.localtime())
-if not os.path.exists(base_folder):
-    os.makedirs(base_folder)
-subfolders = ['checkpoints', 'plots']
-for subfolder in subfolders:
-    if not os.path.exists(base_folder + subfolder):
-        os.makedirs(base_folder + subfolder)
 
-# Log files
-logfile = base_folder + 'log.txt'
-with open(logfile, 'w') as f:
-    f.write('Epoch\tTrain\tValidation\n')
-with open(base_folder + 'args.json', 'w') as f:
-    json.dump(vars(args), f)
 
-start_train = time.time()
-epoch_losses_train, epoch_losses_valid = [], []
-epoch_checkpoints = []
-total_step = 0
 for e in range(args.epochs):
     # Training epoch
     model.train()
     train_sum, train_weights = 0., 0.
-    for train_i, batch in enumerate(loader_train):
+    for train_i, batch in enumerate(loader_antibody):
 
         # Augment the data
         if args.augment:
             batch = alignments.augment(batch)
-
+        import pdb; pdb.set_trace()
         start_batch = time.time()
         # Get a batch
         X, S, mask, lengths = featurize(batch, device, shuffle_fraction=args.shuffle)
         elapsed_featurize = time.time() - start_batch
 
-        optimizer.zero_grad()
         log_probs = model(X, S, lengths, mask)
         _, loss_av_smoothed = loss_smoothed(S, log_probs, mask, weight=args.smoothing)
         loss_av_smoothed.backward()
